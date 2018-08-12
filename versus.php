@@ -21,7 +21,7 @@ while ( $row = mysqli_fetch_array($result) ) {
 ?>
 <div class="row">
   <div class="text-center">
-    <h1>SINO ANG MAS MAGANDA?</h1>
+    <h1>I-CLICK MO KUNG SINO ANG MAS MAGANDA</h1>
   </div>
 </div>
 <div class="row">
