@@ -12,7 +12,7 @@
 <?php
 
 include('database.php');
-$query = "SELECT * FROM Persons ORDER BY RAND() LIMIT 2";
+$query = "SELECT * FROM girls ORDER BY RAND() LIMIT 2";
 $result = mysqli_query($dbc, $query);
 while ( $row = mysqli_fetch_array($result) ) {
   $rows[] = $row;
@@ -21,22 +21,22 @@ while ( $row = mysqli_fetch_array($result) ) {
 ?>
 <div class="row">
   <div class="text-center">
-    <h1>I-CLICK MO KUNG SINO ANG MAS MAGANDA</h1>
+    <h1>CLICK WHO'S HOTTER!</h1>
   </div>
 </div>
 <div class="row">
   <div class="col-sm-6">
     <form action="versus.php" method="post">
-      <input type="hidden" name="winner" value="<?php echo $rows[0]['ID'] ?>" />
-      <input type="hidden" name="loser" value="<?php echo $rows[1]['ID'] ?>" />
-      <input type="image" class="center-block" src="<?php echo $rows[0]['FileName'] ?>" height="300" width="300" />
+      <input type="hidden" name="winner" value="<?php echo $rows[0]['id'] ?>" />
+      <input type="hidden" name="loser" value="<?php echo $rows[1]['id'] ?>" />
+      <input type="image" class="center-block" src="<?php echo $rows[0]['file_name'] ?>" height="300" width="300" />
     </form>
   </div>
   <div class="col-sm-6">
     <form action="versus.php" method="post">
-      <input type="hidden" name="winner" value="<?php echo $rows[1]['ID'] ?>" />
-      <input type="hidden" name="loser" value="<?php echo $rows[0]['ID'] ?>" />
-      <input type="image" class="center-block" src="<?php echo $rows[1]['FileName'] ?>" height="300" width="300" />
+      <input type="hidden" name="winner" value="<?php echo $rows[1]['id'] ?>" />
+      <input type="hidden" name="loser" value="<?php echo $rows[0]['id'] ?>" />
+      <input type="image" class="center-block" src="<?php echo $rows[1]['file_name'] ?>" height="300" width="300" />
     </form>
   </div>
 </div>
@@ -44,33 +44,35 @@ while ( $row = mysqli_fetch_array($result) ) {
 
 ?>
 <?php
+
+function get_new_elo_change($player_elo, $opponent_elo)
+{
+  $temp = ($opponent_elo - $player_elo) / 400;
+  $q = 1+pow(10, $temp);
+  $e = 1 / $q;
+  return $e;
+}
 if ( isset($_POST['winner']) && isset($_POST['loser']) ) {
   $winner = $_POST['winner'];
   $loser = $_POST['loser'];
 
-  $query = "SELECT Elo FROM Persons WHERE ID=" . $winner .";";
+  $query = "SELECT elo FROM girls WHERE id=" . $winner .";";
   $result = mysqli_query($dbc, $query);
   $row = mysqli_fetch_array($result);
-  $winner_elo = $row['Elo'];
+  $winner_elo = $row['elo'];
 
-  $query = "SELECT Elo FROM Persons WHERE ID=" . $loser .";";
+  $query = "SELECT elo FROM girls WHERE id=" . $loser .";";
   $result = mysqli_query($dbc, $query);
   $row = mysqli_fetch_array($result); 
-  $loser_elo = $row['Elo'];
+  $loser_elo = $row['elo'];
 
-  $temp = ($loser_elo - $winner_elo) / 400;
-  $qa = 1+pow(10, $temp);
-  $ea = 1 / $qa;
-  $new_elo_winner = $winner_elo + 32*(1 - $ea);
-  $query = "UPDATE Persons SET Elo=" . $new_elo_winner . " WHERE ID=" . $winner . ";";
+  $new_elo_winner = $winner_elo + 32 * (1 - get_new_elo_change($winner_elo, $loser_elo));
+  $query = "UPDATE girls SET elo=" . $new_elo_winner . " WHERE id=" . $winner;
   $result = mysqli_query($dbc, $query);
 
-  $temp = ($winner_elo  - $loser_elo) / 400;
-  $qa = 1+pow(10, $temp);
-  $ea = 1 / $qa;
 
-  $new_elo_loser = $loser_elo + 32*(0 - $ea);
-  $query = "UPDATE Persons SET Elo=" . $new_elo_loser . " WHERE ID=" . $loser . ";";
+  $new_elo_loser = $loser_elo + 32*(0 - get_new_elo_change($loser_elo, $winner_elo));
+  $query = "UPDATE girls SET elo=" . $new_elo_loser . " WHERE id=" . $loser;
   $result = mysqli_query($dbc, $query) or die("error updating database");
   mysqli_close($dbc);
 }

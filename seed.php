@@ -9,10 +9,11 @@
 <?php
 include('database.php');
 $dirname = 'photo/';
-$images = glob($dirname . "*.jpg");
+$images = glob($dirname . "*.png");
 foreach ( $images as $image) {
-  $query = "INSERT INTO Persons (FileName, Elo) VALUES ('$image', 1500)";
+  $query = "INSERT INTO girls (file_name, elo) VALUES ('$image', 1500)";
   $result = mysqli_query($dbc, $query) or die("Error inserting into database");
+  echo 'success inserting ' . $image . '</br>';
 }
 
 mysqli_close($dbc);
